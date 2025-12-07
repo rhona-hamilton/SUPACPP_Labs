@@ -6,6 +6,7 @@
 #include <iomanip>
 #include <sstream>
 #include "FiniteFunctions.h"
+#include "ExtraDistributions.h"
 
 std::vector<double> readData(std::string);
 int printData(std::vector<double>);
@@ -20,16 +21,32 @@ int main(){
 
     // working with the finitefunctions class
     std::string outFile = "fooBar";
-    float rangeMin = -10; 
-    float rangeMax = 10; 
+    double rangeMin = -10; 
+    double rangeMax = 10; 
     FiniteFunction myFiniteFunction(rangeMin, rangeMax, outFile);
     myFiniteFunction.plotFunction();
 
     // plot the data
-    int Nbins = 20; // number of bins to turn data into histogram
+    int Nbins = 60; // number of bins to turn data into histogram
     bool isData = true; // data points will be black 
     myFiniteFunction.plotData(data, Nbins, isData);
 
+    // define parameters for testing normal distribution 
+    std::string norm_outFile = "normPlot";
+    double mean = 0; 
+    double sigma = 2; 
+    normalDist myNormalDist(rangeMin, rangeMax, mean, sigma, norm_outFile);
+    //std::cout << myNormalDist.rangeMin() << std::endl;
+    myNormalDist.plotFunction(); 
+    myNormalDist.plotData(data,Nbins,isData);
+
+    // define parameters for testing Cauchy-Lorentz distribution 
+    std::string cl_outFile = "cauchyPlot";
+    double x0 = 0;
+    double gamma = 1; 
+    cauchyLor myCauchyLor(rangeMin, rangeMax, x0, gamma, cl_outFile);
+    myCauchyLor.plotFunction();
+    myCauchyLor.plotData(data,Nbins,isData);
     return 0; 
 }
 

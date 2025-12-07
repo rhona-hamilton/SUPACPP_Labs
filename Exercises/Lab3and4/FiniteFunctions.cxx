@@ -64,8 +64,14 @@ Integration by hand (output needed to normalise function when plotting)
 double FiniteFunction::integrate(int Ndiv){ //private
   //over estimate the integral 
   double step = (m_RMax - m_RMin)/Ndiv;
-  
-  return -99;  
+  double area = 0; 
+  for(int i = 1; i <= Ndiv ; i++ ){ 
+    double xi = m_RMin + (i*step);
+    double yi = this->callFunction(xi);
+    area = area + (yi*step);
+  }
+  return area; 
+  //return -99;  
 }
 double FiniteFunction::integral(int Ndiv) { //public
   if (Ndiv <= 0){
@@ -109,7 +115,7 @@ void FiniteFunction::printInfo(){
 
 //Hack because gnuplot-io can't read in custom functions, just scan over function and connect points with a line... 
 void FiniteFunction::plotFunction(){
-  m_function_scan = this->scanFunction(10000);
+  m_function_scan = this->scanFunction(10000); 
   m_plotfunction = true;
 }
 
