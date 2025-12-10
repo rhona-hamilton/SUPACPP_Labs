@@ -8,9 +8,12 @@
 #include "FiniteFunctions.h"
 #include "ExtraDistributions.h"
 
+// header for custom functions 
 std::vector<double> readData(std::string);
 int printData(std::vector<double>);
 
+// main function reads in mystery data, plots mystery data alongside finite functions
+// then samples pseudo data from finite functions to using metropolis algorithm and plots this on same axes 
 int main(){
     // read in mystery data 
     std::string dataFile = "./Outputs/data/MysteryData03331.txt";
@@ -20,33 +23,82 @@ int main(){
     //printData(data);
 
     // working with the finitefunctions class
-    std::string outFile = "fooBar";
-    double rangeMin = -10; 
-    double rangeMax = 10; 
+    std::cout << "***** Function: 1/1+x^2 *****" << std::endl; 
+    std::string outFile = "xSquaredPlot";
+    double rangeMin = -15; 
+    double rangeMax = 15; 
+    std::cout << "Range Min: " << rangeMin << " Range Max: " << rangeMax << std::endl;
     FiniteFunction myFiniteFunction(rangeMin, rangeMax, outFile);
     myFiniteFunction.plotFunction();
 
     // plot the data
-    int Nbins = 60; // number of bins to turn data into histogram
+    int Nbins = 100; // number of bins to turn data into histogram
     bool isData = true; // data points will be black 
+    bool isNot = false;  // for plotting sampled pseudo data 
+    int pNbins = 1000; // number of bins for pseudo data 
+
     myFiniteFunction.plotData(data, Nbins, isData);
 
+    // sample via metropolis algorithm and plot results 
+    std::vector<double> x2_pseudoData;
+    x2_pseudoData = myFiniteFunction.metroSample(); 
+    myFiniteFunction.plotData(x2_pseudoData,pNbins,isNot); 
+
     // define parameters for testing normal distribution 
+    std::cout << "***** Function: Normal Distribution *****" << std::endl; 
     std::string norm_outFile = "normPlot";
-    double mean = 0; 
-    double sigma = 2; 
+    double mean = 1; 
+    double sigma = 2.5; 
+    std::cout << "Range Min: " << rangeMin << " Range Max: " << rangeMax << std::endl;
+    std::cout << "Mean: " << mean << " Standard Deviation: " << sigma << std::endl; 
     normalDist myNormalDist(rangeMin, rangeMax, mean, sigma, norm_outFile);
-    //std::cout << myNormalDist.rangeMin() << std::endl;
+
+    // sample via metropolis algorithm and plot results
+    std::vector<double> norm_pseudoData; 
+    norm_pseudoData = myNormalDist.metroSample(); 
     myNormalDist.plotFunction(); 
     myNormalDist.plotData(data,Nbins,isData);
+    myNormalDist.plotData(norm_pseudoData,pNbins,isNot);
 
     // define parameters for testing Cauchy-Lorentz distribution 
+    std::cout << "***** Function: Cauchy-Lorentz Distribution *****" << std::endl; 
     std::string cl_outFile = "cauchyPlot";
-    double x0 = 0;
-    double gamma = 1; 
-    cauchyLor myCauchyLor(rangeMin, rangeMax, x0, gamma, cl_outFile);
+    double x0 = 1;
+    double gamma = 2.5; 
+    double cl_rangeMin = -20; 
+    double cl_rangeMax = 20;
+    std::cout << "Range Min: " << cl_rangeMin << " Range Max: " << cl_rangeMax << std::endl;
+    std::cout << "Location: " << x0 << " Width: " << gamma << std::endl;
+    cauchyLor myCauchyLor(cl_rangeMin, cl_rangeMax, x0, gamma, cl_outFile);
     myCauchyLor.plotFunction();
     myCauchyLor.plotData(data,Nbins,isData);
+
+    // sample via metropolis algorithm and plot results
+    std::vector<double> cl_pseudoData; 
+    cl_pseudoData = myCauchyLor.metroSample(); 
+    myCauchyLor.plotData(cl_pseudoData,pNbins,isNot); 
+
+    // define parameters for testing Cystal ball distribution 
+    std::cout << "***** Function: Crystal Ball Distribution *****" << std::endl; 
+    std::string cb_outFile = "crystalPlot";
+    double cb_mean = 2;
+    double cb_sigma = 1;
+    double n = 3;
+    double alpha = 1;
+    double cb_rangeMin = -10; 
+    double cb_rangeMax = 10; 
+    std::cout << "Range Min: " << cb_rangeMin << " Range Max: " << cb_rangeMax << std::endl;
+    std::cout << "mu: " << cb_mean << " sigma: " << cb_sigma << " n: " << n << " alpha: " << alpha << std::endl; 
+    crystalBall myCrystalBall(cb_rangeMin, cb_rangeMax, cb_mean, cb_sigma, n, alpha, cb_outFile);
+    
+    // sample via metropolis algorithm and plot results
+    std::vector<double> cb_pseudoData; 
+    cb_pseudoData = myCrystalBall.metroSample(); 
+
+    myCrystalBall.plotFunction();
+    myCrystalBall.plotData(data,Nbins,isData);
+    myCrystalBall.plotData(cb_pseudoData,pNbins,isNot);
+
     return 0; 
 }
 

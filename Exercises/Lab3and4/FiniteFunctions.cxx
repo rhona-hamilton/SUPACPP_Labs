@@ -3,6 +3,7 @@
 #include <vector>
 #include "FiniteFunctions.h"
 #include <filesystem> //To check extensions in a nice way
+#include <random>
 
 #include "gnuplot-iostream.h" //Needed to produce plots (not part of the course) 
 
@@ -86,6 +87,78 @@ double FiniteFunction::integral(int Ndiv) { //public
   else return m_Integral; //Don't bother re-calculating integral if Ndiv is the same as the last call
 }
 
+/*
+###################
+Metropolis-Hastings Algorithm 
+###################
+*/ 
+std::vector<double> FiniteFunction::metroSample(){
+  // vector to store pseudo data 
+  std::vector<double> pseudoData; 
+  // initialise random number generation
+  std::random_device rd; 
+  std::mt19937 mtEngine{rd()};
+  std::uniform_real_distribution<float> uniformPDF{m_RMin, m_RMax};
+ 
+  // parameters of algorithm 
+  float gausWidth = 5; 
+  int maxIter = 100000; // number of data points to generate 
+  
+  int count; //used to control while loop 
+
+  // generate random number xi from uniform distribution 
+  float rand_x = uniformPDF(mtEngine); 
+  // draw y from normal distribution centred on xi 
+  std::normal_distribution<float> gaussianPDF(rand_x,gausWidth);
+  float rand_y = gaussianPDF(mtEngine);
+
+  double fx = callFunction(rand_x);
+  double fy = callFunction(rand_y); 
+  double A; //compute A = min(f(y)/f(xi),1)
+  if(fy/fx < 1){
+     A = fy/fx; 
+  } else{
+    A = 1; 
+  }
+  // generate T - form uniform distribution between 0 and 1
+  std::uniform_real_distribution<float> unitaryPDF{0,1}; 
+  float rand_T = unitaryPDF(mtEngine); 
+  double sample; 
+  double nextX; 
+
+  if(rand_T < A){
+    sample = rand_y; // accept y as a sample  
+    pseudoData.push_back(sample);
+    nextX = rand_y; // set xi+1 as y
+    count = 1; 
+  } else{
+    nextX = rand_x; // set xi+1 as xi
+    count = 0; 
+  }
+
+// repeat the algorithm to generate all your data 
+  while (count < maxIter){
+    std::normal_distribution<float> gaussianPDF(nextX,gausWidth);
+    //std::cout << nextX << std::endl; 
+    rand_y = gaussianPDF(mtEngine);
+    double fx = callFunction(nextX);
+    double fy = callFunction(rand_y); 
+  if(fy/fx < 1){
+    A = fy/fx; 
+  } else{
+    A = 1; 
+  }
+  if(rand_T < A){
+    sample = rand_y;
+    pseudoData.push_back(sample); 
+    nextX = rand_y; 
+    count ++; 
+  } 
+}
+
+return pseudoData; 
+
+}
 /*
 ###################
 //Helper functions 
